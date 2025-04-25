@@ -1,0 +1,11 @@
+{
+  "molmo_lmms-lab/RefCOCO": 0.1,
+  "llava_lmms-lab/RefCOCO": 0.0,
+  "dino_lmms-lab/RefCOCO": 0.6,
+  "molmo_lmms-lab/RefCOCOplus": 0.0,
+  "llava_lmms-lab/RefCOCOplus": 0.0,
+  "dino_lmms-lab/RefCOCOplus": 0.4,
+  "molmo_lmms-lab/RefCOCOg": 0.0,
+  "llava_lmms-lab/RefCOCOg": 0.0,
+  "dino_lmms-lab/RefCOCOg": 0.9
+}
