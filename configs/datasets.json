@@ -1,0 +1,21 @@
+{
+    "lmms-lab/RefCOCO": {
+      "image_field": "image",
+      "text_field": "answer",
+      "bbox_field": "bbox",
+      "split": "testA"
+    },
+    "lmms-lab/RefCOCOplus": {
+    "image_field": "image",
+      "text_field": "answer",
+      "bbox_field": "bbox",
+      "split": "testA"
+    },
+    "lmms-lab/RefCOCOg": {
+      "image_field": "image",
+      "text_field": "answer",
+      "bbox_field": "bbox",
+      "split": "test"
+    }
+  }
+  
