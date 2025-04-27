@@ -14,7 +14,10 @@ def predict(image: Image.Image, text: str, model, processor, device):
     # Grounding DINO expects a list of lists of phrases (queries)
     text_labels = [text]
 
-    inputs = processor(images=image, text=[text_labels], return_tensors="pt").to(device)
+    if image.mode != "RGB":
+        image = image.convert("RGB")
+
+    inputs = processor(images=image, text=text_labels, return_tensors="pt").to(device)
 
     with torch.no_grad():
         outputs = model(**inputs)
