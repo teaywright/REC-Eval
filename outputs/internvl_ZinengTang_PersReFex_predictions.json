@@ -1,0 +1,96 @@
+{
+  "ZinengTang/PersReFex": {
+    "internvl": [
+      {
+        "text": "at the bottom of the staircase closest to you.",
+        "prediction": {
+          "box": [
+            500,
+            400,
+            550,
+            450
+          ]
+        },
+        "gt_bbox": [
+          547.0,
+          703.0,
+          578.0,
+          728.0
+        ],
+        "correct": 0
+      },
+      {
+        "text": "The blue ball in the one in the middle, directly in front of the dresser, and the closest ball to you.",
+        "prediction": {
+          "box": [
+            500,
+            400,
+            600,
+            500
+          ]
+        },
+        "gt_bbox": [
+          552.0,
+          751.0,
+          583.0,
+          779.0
+        ],
+        "correct": 0
+      },
+      {
+        "text": "The last ball located at the corner of the room",
+        "prediction": {
+          "box": [
+            500,
+            300,
+            600,
+            400
+          ]
+        },
+        "gt_bbox": [
+          484.0,
+          639.0,
+          505.0,
+          655.0
+        ],
+        "correct": 0
+      },
+      {
+        "text": "The blue ball is the first and closest to you.",
+        "prediction": {
+          "box": [
+            500,
+            300,
+            550,
+            350
+          ]
+        },
+        "gt_bbox": [
+          453.0,
+          703.0,
+          484.0,
+          728.0
+        ],
+        "correct": 0
+      },
+      {
+        "text": "near the center of the room on the floor to the right of the red ball.",
+        "prediction": {
+          "box": [
+            300,
+            300,
+            400,
+            400
+          ]
+        },
+        "gt_bbox": [
+          205.0,
+          939.0,
+          272.0,
+          1006.0
+        ],
+        "correct": 0
+      }
+    ]
+  }
+}

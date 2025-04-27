@@ -16,21 +16,28 @@ def load():
     processor = AutoProcessor.from_pretrained(MODEL_ID)
     return model, processor
 
-def _parse_bbox_from_json_response(response: str):
-    # Strip the code block markers (```json ... ```)
-    json_text_match = re.search(r"```json\s*(.*?)\s*```", response, re.DOTALL)
-    if not json_text_match:
-        return None
+# def _parse_bbox_from_json_response(response: str):
+#     # Strip the code block markers (```json ... ```)
+#     json_text_match = re.search(r"```json\s*(.*?)\s*```", response, re.DOTALL)
+#     if not json_text_match:
+#         return None
 
-    json_text = json_text_match.group(1)
+#     json_text = json_text_match.group(1)
 
-    try:
-        data = json.loads(json_text)
-        if isinstance(data, list) and "bbox_2d" in data[0]:
-            return data[0]["bbox_2d"]
-    except json.JSONDecodeError as e:
-        print("JSON decode error:", json_text)
+#     try:
+#         data = json.loads(json_text)
+#         if isinstance(data, list) and "bbox_2d" in data[0]:
+#             return data[0]["bbox_2d"]
+#     except json.JSONDecodeError as e:
+#         print("JSON decode error:", json_text)
 
+#     return None
+
+def _parse_bbox_from_text(text: str):
+    match = re.search(r"(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)", text)
+    if match:
+        x1, y1, x2, y2 = map(int, match.groups())
+        return [x1, y1, x2, y2]
     return None
 
 def predict(image: Image.Image, text: str, model, processor, device):
@@ -39,7 +46,10 @@ def predict(image: Image.Image, text: str, model, processor, device):
             "role": "user",
             "content": [
                 {"type": "image", "image": image},
-                {"type": "text", "text": f"Provide the bounding box (x1,y1,x2,y2) of the object referred to as: '{text}'"},
+                # {"type": "text", "text": f"Provide the bounding box (x1,y1,x2,y2) of the object referred to as: '{text}'"},
+                {"type": "text", "text": f"The speaker is describing the location of the blue sphere relative to the environment features, \
+                 relative to their view and another person’s view, and in contrast with other red spheres. Provide the bounding box of the blue sphere \
+                 referred to as: '{text}'. Return only the bounding box as a tuple of 4 numbers (x1, y1, x2, y2)."},
             ],
         }
     ]
@@ -65,7 +75,8 @@ def predict(image: Image.Image, text: str, model, processor, device):
         )[0]
 
     # Extract bounding box using regex
-    box = _parse_bbox_from_json_response(decoded)
+    # box = _parse_bbox_from_json_response(decoded)
+    box = _parse_bbox_from_text(decoded)
     if box:
         return {"box": box}
     return {"text": decoded}

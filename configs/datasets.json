@@ -16,6 +16,14 @@
       "text_field": "answer",
       "bbox_field": "bbox",
       "split": "test"
+    },
+    "ZinengTang/PersReFex": {
+      "image_field": "speaker_view_image",
+      "text_field": "human_speaker_message",
+      "bbox_field": "speaker_target_bbox",
+      "distractor0_field": "speaker_distractor_0_bbox",
+      "distractor1_field": "speaker_distractor_1_bbox",
+      "split": "validation"
     }
   }
   

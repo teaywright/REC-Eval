@@ -81,7 +81,9 @@ def evaluate_prediction(
     ground_truth: List[float],
     model_name: str,
     image_size: Tuple[int, int] = None,
-    iou_threshold: float = 0.5
+    iou_threshold: float = 0.5,
+    distractors = None,
+    gt_xywh = True
 ) -> int:
     """
     Evaluate prediction against ground-truth [x,y,w,h] on IoU.
@@ -89,9 +91,13 @@ def evaluate_prediction(
       - DINO structured detections
       - model_name "molmo" normalized box in prediction['box']
       - prediction['box'] for other models
+      - distractor based evaluation for ZinengTang/PersReFex
     """
-    # convert ground truth to xyxy
-    gt_xyxy = xywh_to_xyxy(ground_truth)
+    # convert ground truth to xyxy if needed
+    if gt_xywh:
+        gt_xyxy = xywh_to_xyxy(ground_truth)
+    else:
+        gt_xyxy = ground_truth
 
     # DINO detections
     if model_name == "dino" and "detections" in prediction:
@@ -118,5 +124,16 @@ def evaluate_prediction(
     # convert xywh to xyxy if needed
     if len(bbox) == 4 and model_name != "llava" and (bbox[2] <= image_size[0] and bbox[3] <= image_size[1] and bbox[2] < bbox[0] + 1):
         bbox = xywh_to_xyxy(bbox)
+
+    # distractor based evaluation: if the prediction is closer to a distractor than the ground truth, return 0
+    if distractors:
+        distractor0, distractor1 = distractors       
+        d0_iou = compute_iou(bbox, distractor0)
+        d1_iou = compute_iou(bbox, distractor1)
+        target_iou = compute_iou(bbox, gt_xyxy)
+        if d0_iou >= target_iou or d1_iou >= target_iou:
+            return 0
+        else:
+            return 1
 
     return int(compute_iou(bbox, gt_xyxy) >= iou_threshold)

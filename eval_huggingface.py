@@ -24,13 +24,16 @@ def parse_args():
                         help='Output file to save predictions')
     return parser.parse_args()
 
+def _string_to_floats(st: str):
+    return [float(x.strip()) for x in st.strip('()').split(',')]
+
 def main():
     args = parse_args()
     
     # === Config ===
     DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    ALL_MODELS = ["molmo", "llava", "dino", "qwen25vl"] # "paligemma"
-    ALL_DATASETS = ["lmms-lab/RefCOCO", "lmms-lab/RefCOCOplus", "lmms-lab/RefCOCOg"]
+    ALL_MODELS = ["molmo", "llava", "dino", "qwen25vl", "internvl"] # "paligemma"
+    ALL_DATASETS = ["lmms-lab/RefCOCO", "lmms-lab/RefCOCOplus", "lmms-lab/RefCOCOg", "ZinengTang/PersReFex"]
     CONFIG_PATH = "configs/datasets.json"
 
     # Process model and dataset arguments
@@ -72,6 +75,8 @@ def main():
                 text_field = sample[config["text_field"]]
                 text = text_field[0] if isinstance(text_field, list) else text_field
                 gt_bbox = sample[config["bbox_field"]]
+                if isinstance(gt_bbox, str):
+                    gt_bbox = _string_to_floats(gt_bbox)
 
                 prediction = load_model_and_predict(
                     model_name,
@@ -81,13 +86,20 @@ def main():
                     processor=processor,
                     device=DEVICE
                 )
-
-                correct += evaluate_prediction(prediction, gt_bbox, model_name, image_size=image.size)
+                
+                if dataset_name == "ZinengTang/PersReFex": # distractor based evaluation + gt is in xyxy format
+                    distractor0, distractor1 = _string_to_floats(sample[config["distractor0_field"]]), _string_to_floats(sample[config["distractor1_field"]])
+                    result = evaluate_prediction(prediction, gt_bbox, model_name, image_size=image.size, distractors=[distractor0, distractor1], gt_xywh=False)
+                    correct += result
+                else:
+                    result = evaluate_prediction(prediction, gt_bbox, model_name, image_size=image.size)
+                    correct += result
 
                 if i == 0:
                     print(f"Sample text: {text}")
                     print(f"Ground truth bbox: {gt_bbox}")
                     print(f"Prediction: {prediction}")
+                    print(f"Result: {result}")
                 
                 if len(predictions[f"{dataset_name}"][f"{model_name}"]) == 0:
                     predictions[f"{dataset_name}"][f"{model_name}"] = []
@@ -95,6 +107,7 @@ def main():
                     "text": text,
                     "prediction": prediction,
                     "gt_bbox": gt_bbox,
+                    "correct": result,
                     # "image": image_field
                 })
 
