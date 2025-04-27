@@ -8,9 +8,9 @@ gpu "python eval_refcocofamily.py --datasets all \
 --output_predictions outputs/all_predictions.json"
 
 # qwen25vl
-gpu "python eval_refcocofamily.py --datasets lmms-lab/RefCOCO \
---models qwen25vl --num_samples 10 --output_file outputs/qwen25vl_results.json \
---output_predictions outputs/qwen25vl_predictions.json"
+gpu "python eval_refcocofamily.py --datasets lmms-lab/RefCOCO --models qwen25vl"
+gpu "python eval_refcocofamily.py --datasets lmms-lab/RefCOCOplus --models qwen25vl"
+gpu "python eval_refcocofamily.py --datasets lmms-lab/RefCOCOg --models qwen25vl"
 
 # llava
 gpu "python eval_refcocofamily.py --datasets lmms-lab/RefCOCO \

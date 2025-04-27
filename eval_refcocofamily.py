@@ -18,10 +18,10 @@ def parse_args():
                         help='List of models to evaluate. Use "all" for all models or specify one or more from: molmo, llava, dino')
     parser.add_argument('--num_samples', type=int, default=None,
                         help='Number of samples to evaluate (default: None)')
-    parser.add_argument('--output_file', type=str, default="results_sample.json",
-                        help='Output file to save results (default: results_sample.json)')
-    parser.add_argument('--output_predictions', type=str, default="predictions_sample.json",
-                        help='Output file to save predictions (default: predictions_sample.json)')
+    parser.add_argument('--output_file', type=str,
+                        help='Output file to save results')
+    parser.add_argument('--output_predictions', type=str,
+                        help='Output file to save predictions')
     return parser.parse_args()
 
 def main():
@@ -102,14 +102,20 @@ def main():
             print(f"{model_name} on {dataset_name}: {accuracy:.3f}")
             results[f"{model_name}_{dataset_name}"] = accuracy
 
-    # Save results
-    if args.output_file:
-        with open(args.output_file, "w") as f:
-            json.dump(results, f, indent=2)
+            # Save results
+            if args.output_file:
+                with open(args.output_file, "w") as f:
+                    json.dump(results, f, indent=2)
+            else:
+                with open(f'outputs/{model_name}_{dataset_name.replace("/", "_")}_results.json', "w") as f:
+                    json.dump(results, f, indent=2)
 
-    if args.output_predictions:
-        with open(args.output_predictions, "w") as f:
-            json.dump(predictions, f, indent=2)
+            if args.output_predictions:
+                with open(args.output_predictions, "w") as f:
+                    json.dump(predictions, f, indent=2)
+            else:
+                with open(f'outputs/{model_name}_{dataset_name.replace("/", "_")}_predictions.json', "w") as f:
+                    json.dump(predictions, f, indent=2)
 
 if __name__ == "__main__":
     main()
