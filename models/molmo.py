@@ -11,14 +11,14 @@ def load():
     processor = AutoProcessor.from_pretrained(
         MODEL_ID,
         trust_remote_code=True,
-        torch_dtype='auto',
+        torch_dtype=torch.bfloat16,
         device_map='auto'
     )
 
     model = AutoModelForCausalLM.from_pretrained(
         MODEL_ID,
         trust_remote_code=True,
-        torch_dtype='auto',
+        torch_dtype=torch.bfloat16,
         device_map='auto'
     )
 
@@ -38,8 +38,11 @@ def predict(image: Image.Image, text: str, model, processor, device):
     )
 
 
+    # inputs = processor.process(images=[image], text=prompt)
+    # inputs = {k: v.to(device).unsqueeze(0) for k, v in inputs.items()}
+
     inputs = processor.process(images=[image], text=prompt)
-    inputs = {k: v.to(device).unsqueeze(0) for k, v in inputs.items()}
+    inputs = {k: v.to(device, dtype=torch.bfloat16).unsqueeze(0) if v.dtype.is_floating_point else v.to(device).unsqueeze(0) for k, v in inputs.items()}
 
     # Generate prediction
     output = model.generate_from_batch(
