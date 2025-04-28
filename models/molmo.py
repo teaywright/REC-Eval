@@ -27,10 +27,16 @@ def load():
 
 def predict(image: Image.Image, text: str, model, processor, device):
     # Prompt for bounding box prediction
+    # prompt = (
+    #     f"Given the referring expression '{text}', provide the bounding box"
+    #     " in the format (x1,y1,x2,y2)."
+    # )
+
+    #Prompt for points
     prompt = (
-        f"Given the referring expression '{text}', provide the bounding box"
-        " in the format (x1,y1,x2,y2)."
+        f"Point to {text}."
     )
+
 
     inputs = processor.process(images=[image], text=prompt)
     inputs = {k: v.to(device).unsqueeze(0) for k, v in inputs.items()}

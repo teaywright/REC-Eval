@@ -75,6 +75,38 @@ def parse_box_from_text(text: str) -> Tuple[float, float, float, float]:
 
     raise ValueError(f"Could not parse bounding box from text: '{text}'")
 
+def parse_point_from_text(text: str) -> Tuple[float, float]:
+    """
+    Extract a point (x, y) from model-generated text.
+    Supports:
+      - XML attributes: <point x="..." y="..." ...>
+      - Parentheses: (x,y)
+      - Python list: [x, y]
+    Returns (x, y).
+    """
+    # XML-like pattern
+    x_attr = re.search(r'x\s*=\s*"([-+]?\d*\.?\d+)"', text)
+    y_attr = re.search(r'y\s*=\s*"([-+]?\d*\.?\d+)"', text)
+    if x_attr and y_attr:
+        x = float(x_attr.group(1))
+        y = float(y_attr.group(1))
+        return (x, y)
+
+    # Parentheses pattern
+    paren_match = re.search(r"\(\s*([-+]?\d*\.?\d+)\s*,\s*([-+]?\d*\.?\d+)\s*\)", text)
+    if paren_match:
+        return tuple(float(g) for g in paren_match.groups())
+
+    # Python list pattern
+    list_match = re.search(r"\[([^\]]+)\]", text)
+    if list_match:
+        parts = [p.strip() for p in list_match.group(1).split(',')]
+        if len(parts) >= 2:
+            x, y = float(parts[0]), float(parts[1])
+            return (x, y)
+
+    raise ValueError(f"Could not parse point from text: '{text}'")
+
 
 def evaluate_prediction(
     prediction: Dict,
@@ -107,6 +139,30 @@ def evaluate_prediction(
                 return 1
         return 0
 
+    if model_name == "molmo":
+        try:
+            if "text" in prediction and not prediction.get("box"):
+                point = parse_point_from_text(prediction["text"])
+            else:
+                point = prediction.get("point")
+            if point is None:
+                return 0
+
+            # Rescale if normalized (Molmo predicts 0–100)
+            if image_size:
+                w, h = image_size
+                point = (point[0] / 100 * w, point[1] / 100 * h)
+
+            x1, y1, x2, y2 = gt_xyxy
+            px, py = point
+            # Check if point inside box
+            if x1 <= px <= x2 and y1 <= py <= y2:
+                return 1
+            else:
+                return 0
+        except Exception:
+            return 0
+
     # parse free-text bounding box
     if "text" in prediction and not prediction.get("box"):
         try:
@@ -116,11 +172,11 @@ def evaluate_prediction(
     else:
         bbox = prediction.get("box")
 
-    # handle normalized molmo box
-    if model_name == "molmo" and image_size and bbox:
-        w, h = image_size
-        bbox = [coord / 100 * (w if i % 2 == 0 else h) for i, coord in enumerate(bbox)]
-
+    # # handle normalized molmo box
+    # if model_name == "molmo" and image_size and bbox:
+    #     w, h = image_size
+    #     bbox = [coord / 100 * (w if i % 2 == 0 else h) for i, coord in enumerate(bbox)]
+    
     # convert xywh to xyxy if needed
     if len(bbox) == 4 and model_name != "llava" and (bbox[2] <= image_size[0] and bbox[3] <= image_size[1] and bbox[2] < bbox[0] + 1):
         bbox = xywh_to_xyxy(bbox)
