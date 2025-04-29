@@ -24,6 +24,26 @@
       "distractor0_field": "speaker_distractor_0_bbox",
       "distractor1_field": "speaker_distractor_1_bbox",
       "split": "validation"
+    },
+    "jxu124/guesswhat": {
+      "image_field": "image_raw",
+      "text_field": "qas",
+      "bbox_field": "objects",
+      "split": "test"
+    },
+    "sk-vg.v1": {
+      "image_field": "image",
+      "text_field": "text",
+      "bbox_field": "bbox",
+      "split": "test"
+    },
+    "chiayewken/skvg": {
+      "image_field": "image",
+      "text_field_knowledge": "knowledge",
+      "text_field": "ref_exp",
+      "bbox_field": "bbox",
+      "split": "test"
     }
+
   }
   

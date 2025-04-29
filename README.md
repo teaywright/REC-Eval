@@ -33,6 +33,14 @@ gpu "python eval_refcocofamily.py --datasets lmms-lab/RefCOCOg --models internvl
 ```
 - Examples:
 ```bash
-gpu "python eval_huggingface.py --datasets ZinengTang/PersReFex --models qwen25vl"
+gpu "python eval_huggingface.py --datasets ZinengTang/PersReFex --models qwen25vl --num_samples 5 --output_file test.json --output_predictions test_pred.json"
 gpu "python eval_huggingface.py --datasets ZinengTang/PersReFex --models internvl --num_samples 5"
+```
+
+## SK-VG
+- Examples:
+```bash
+gpu "python eval_huggingface.py --datasets sk-vg.v1 --models qwen25vl --num_samples 5"
+gpu "python eval_huggingface.py --datasets chiayewken/skvg --models qwen25vl --num_samples 5"
+gpu "python eval_huggingface.py --datasets sk-vg.v1 --models internvl --num_samples 5"
 ```

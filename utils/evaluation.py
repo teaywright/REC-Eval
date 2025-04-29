@@ -7,17 +7,30 @@ import json
 import re
 from typing import List, Dict, Tuple
 from datasets import load_dataset as hf_load_dataset
+import os
+from PIL import Image
+from tqdm import tqdm
 
+def load_local_dataset(name: str):
+    """Loads local dataset split as specified in config."""
+    if name == "sk-vg.v1":
+        dataset = []
+        path = f"data/sk-vg.v1/annotations.json"
+        with open(path, "r") as f:
+            data = json.load(f)
+        for sample in tqdm(data["test"], desc="Loading SK-VG.v1 dataset"):
+            image_path = os.path.join('data/sk-vg.v1/images', sample['image_name'])
+            image = Image.open(image_path).convert("RGB")
+            sample['image'] = image
 
-def load_refcoco_dataset(name: str, config: dict):
-    """Loads a RefCOCO-style dataset from JSONL or other source."""
-    path = f"datasets/{name}.json"
-    with open(path, "r") as f:
-        data = json.load(f)
-    return data
+            text = f"Provide the bounding box of the object referred to as: '{sample['ref_exp']}'. Given the following knowledge: '{sample["knowledge"]}'. Return only the bounding box as a tuple of 4 numbers (x1, y1, x2, y2)."
+            sample['text'] = text
+            dataset.append(sample)
+        return dataset
+    else:
+        raise ValueError(f"Dataset {name} not supported")
 
-
-def load_dataset(name: str, config: dict):
+def load_HF_dataset(name: str, config: dict):
     """Loads HF dataset split as specified in config."""
     split = config.get("split", "test")
     return hf_load_dataset(name, split=split)

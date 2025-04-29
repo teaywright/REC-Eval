@@ -5,11 +5,13 @@ import argparse
 from PIL import Image
 from tqdm import tqdm
 from utils.evaluation import (
-    load_dataset,
+    load_HF_dataset,
+    load_local_dataset,
     evaluate_prediction,
 )
 from models import load_model_and_predict
 from collections import defaultdict
+
 def parse_args():
     parser = argparse.ArgumentParser(description='Evaluate models on RefCOCO family datasets')
     parser.add_argument('--datasets', nargs='+', default=["all"],
@@ -33,7 +35,7 @@ def main():
     # === Config ===
     DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     ALL_MODELS = ["molmo", "llava", "dino", "qwen25vl", "internvl"] # "paligemma"
-    ALL_DATASETS = ["lmms-lab/RefCOCO", "lmms-lab/RefCOCOplus", "lmms-lab/RefCOCOg", "ZinengTang/PersReFex"]
+    ALL_DATASETS = ["lmms-lab/RefCOCO", "lmms-lab/RefCOCOplus", "lmms-lab/RefCOCOg", "ZinengTang/PersReFex", "jxu124/guesswhat", "sk-vg.v1", "chiayewken/skvg"]
     CONFIG_PATH = "configs/datasets.json"
 
     # Process model and dataset arguments
@@ -58,7 +60,10 @@ def main():
 
     for dataset_name in datasets_to_evaluate:
         config = dataset_configs[dataset_name]
-        dataset = load_dataset(dataset_name, config)
+        if dataset_name == "sk-vg.v1":
+            dataset = load_local_dataset(dataset_name)
+        else:
+            dataset = load_HF_dataset(dataset_name, config)
 
         for model_name in models_to_evaluate:
             print(f"\nEvaluating {model_name} on {dataset_name}...")
@@ -74,9 +79,16 @@ def main():
 
                 text_field = sample[config["text_field"]]
                 text = text_field[0] if isinstance(text_field, list) else text_field
+
+                if dataset_name == "chiayewken/skvg":
+                    text_field_knowledge = sample[config["text_field_knowledge"]]
+                    text = f"Provide the bounding box of the object referred to as: '{text}'. Given the following knowledge: '{text_field_knowledge}'. Return only the bounding box as a tuple of 4 numbers (x1, y1, x2, y2)."
+                
                 gt_bbox = sample[config["bbox_field"]]
                 if isinstance(gt_bbox, str):
                     gt_bbox = _string_to_floats(gt_bbox)
+                if isinstance(gt_bbox, dict):
+                    gt_bbox = [float(gt_bbox["x"]), float(gt_bbox["y"]), float(gt_bbox["width"]), float(gt_bbox["height"])]
 
                 prediction = load_model_and_predict(
                     model_name,

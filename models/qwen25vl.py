@@ -46,10 +46,11 @@ def predict(image: Image.Image, text: str, model, processor, device):
             "role": "user",
             "content": [
                 {"type": "image", "image": image},
-                # {"type": "text", "text": f"Provide the bounding box (x1,y1,x2,y2) of the object referred to as: '{text}'"},
-                {"type": "text", "text": f"The speaker is describing the location of the blue sphere relative to the environment features, \
-                 relative to their view and another person’s view, and in contrast with other red spheres. Provide the bounding box of the blue sphere \
-                 referred to as: '{text}'. Return only the bounding box as a tuple of 4 numbers (x1, y1, x2, y2)."},
+                # {"type": "text", "text": f"Provide the bounding box of the object referred to as: '{text}'. Return the bounding box as a tuple of 4 numbers (x1, y1, x2, y2)."},
+                # {"type": "text", "text": f"The speaker is describing the location of the blue sphere relative to the environment features, \
+                #  relative to their view and another person’s view, and in contrast with other red spheres. Provide the bounding box of the blue sphere \
+                #  referred to as: '{text}'. Return only the bounding box as a tuple of 4 numbers (x1, y1, x2, y2)."},
+                {"type": "text", "text": text},
             ],
         }
     ]
