@@ -153,15 +153,40 @@ def evaluate_prediction(
                 w, h = image_size
                 point = (point[0] / 100 * w, point[1] / 100 * h)
 
-            x1, y1, x2, y2 = gt_xyxy
             px, py = point
-            # Check if point inside box
-            if x1 <= px <= x2 and y1 <= py <= y2:
-                return 1
+
+            x1, y1, x2, y2 = gt_xyxy
+
+            # Calculate distance from point to center of target box
+            target_cx, target_cy = (x1 + x2) / 2, (y1 + y2) / 2
+            dist_target = ((px - target_cx) ** 2 + (py - target_cy) ** 2) ** 0.5
+
+            if distractors:
+                distractor0, distractor1 = distractors
+
+                # Distances to centers of distractor boxes
+                d0_cx, d0_cy = (distractor0[0] + distractor0[2]) / 2, (distractor0[1] + distractor0[3]) / 2
+                d1_cx, d1_cy = (distractor1[0] + distractor1[2]) / 2, (distractor1[1] + distractor1[3]) / 2
+
+                dist_d0 = ((px - d0_cx) ** 2 + (py - d0_cy) ** 2) ** 0.5
+                dist_d1 = ((px - d1_cx) ** 2 + (py - d1_cy) ** 2) ** 0.5
+
+                # Must be closer to target center than either distractor center
+                if dist_target < dist_d0 and dist_target < dist_d1:
+                    return 1
+                else:
+                    return 0
             else:
-                return 0
-        except Exception:
+                # Regular "inside box" check
+                if x1 <= px <= x2 and y1 <= py <= y2:
+                    return 1
+                else:
+                    return 0
+
+        except Exception as e:
+            print(f"Molmo evaluation error: {e}")
             return 0
+
 
     # parse free-text bounding box
     if "text" in prediction and not prediction.get("box"):
